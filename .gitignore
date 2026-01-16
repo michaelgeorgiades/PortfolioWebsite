@@ -3,4 +3,4 @@ build/
 out/
 contact.php
 .env
-.exe
+*.exe
