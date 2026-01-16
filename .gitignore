@@ -1,3 +1,6 @@
+dist/
+build/
+out/
 contact.php
 .env
 .exe
