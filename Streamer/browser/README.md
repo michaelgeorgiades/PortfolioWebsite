@@ -123,10 +123,44 @@ ffmpeg -i recording.webm -c:v libx264 -crf 23 -preset fast -c:a aac output.mp4
 - Lower recording quality (choose HD or SD)
 - Convert to MP4 after recording
 
-### Webcam not showing?
-- Grant camera permissions
-- Check if webcam is being used by another app
-- Try selecting a different camera from the dropdown
+### Webcam not showing in dropdown?
+**This is the most common issue - follow these steps:**
+
+1. **Open Browser Console** (Press F12, then click "Console" tab)
+   - Look for errors related to permissions or devices
+   - You should see logs like "Camera permission granted" and "Added camera: ..."
+
+2. **Check Browser Permissions**
+   - Click the padlock/info icon in the address bar
+   - Make sure Camera and Microphone are set to "Allow"
+   - If blocked, change to "Allow" and refresh the page
+
+3. **Clear Site Data and Retry**
+   - Right-click → Inspect → Application tab → Clear site data
+   - Refresh the page
+   - Grant permissions when prompted
+
+4. **Verify Camera Works in Browser**
+   - Try opening your camera in another website (like meet.google.com)
+   - If it doesn't work there, it's a system/driver issue
+
+5. **Check for Conflicts**
+   - Close other apps using your camera (Zoom, Teams, Skype, etc.)
+   - Close other browser tabs using the camera
+
+6. **Try Different Browser**
+   - Chrome and Edge have the best support
+   - Firefox should also work
+   - Safari has limited support
+
+7. **Manual Device Refresh**
+   - Press **F5** key in the app to manually refresh device list
+   - Or refresh the entire page
+
+8. **Still Not Working?**
+   - Check browser console for specific error messages
+   - Make sure you're using HTTPS (or localhost/file://)
+   - Update your browser to the latest version
 
 ## Privacy & Security
 

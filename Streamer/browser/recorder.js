@@ -84,27 +84,50 @@ async function init() {
 
 // Request media permissions
 async function requestPermissions() {
+  let cameraGranted = false;
+  let micGranted = false;
+
+  // Try to request camera permission
   try {
-    // Request camera and microphone access to get device labels
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: true,
+    console.log('Requesting camera permission...');
+    const videoStream = await navigator.mediaDevices.getUserMedia({
+      video: true
+    });
+    videoStream.getTracks().forEach(track => track.stop());
+    cameraGranted = true;
+    console.log('Camera permission granted');
+  } catch (err) {
+    console.warn('Camera permission error:', err);
+    if (err.name === 'NotAllowedError') {
+      showToast('Camera permission denied - webcam features disabled', 'info');
+    } else if (err.name === 'NotFoundError') {
+      console.log('No camera found');
+    }
+  }
+
+  // Try to request microphone permission
+  try {
+    console.log('Requesting microphone permission...');
+    const audioStream = await navigator.mediaDevices.getUserMedia({
       audio: true
     });
-
-    // Stop the stream immediately - we just needed the permission
-    stream.getTracks().forEach(track => track.stop());
-
-    console.log('Permissions granted');
-    return true;
+    audioStream.getTracks().forEach(track => track.stop());
+    micGranted = true;
+    console.log('Microphone permission granted');
   } catch (err) {
-    console.error('Permission error:', err);
-
+    console.warn('Microphone permission error:', err);
     if (err.name === 'NotAllowedError') {
-      showToast('Please allow camera and microphone access to use all features', 'info');
+      showToast('Microphone permission denied - mic features disabled', 'info');
     } else if (err.name === 'NotFoundError') {
-      console.log('No camera/mic found, continuing without them');
+      console.log('No microphone found');
     }
+  }
 
+  if (cameraGranted || micGranted) {
+    console.log('Permissions result - Camera:', cameraGranted, 'Mic:', micGranted);
+    return true;
+  } else {
+    showToast('Please grant camera/microphone permissions to use these features', 'info');
     return false;
   }
 }
@@ -195,10 +218,20 @@ async function loadDevices() {
 
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    console.log('Found devices:', devices);
+    console.log('All devices:', devices.length);
+
+    // Log each device for debugging
+    devices.forEach((device, i) => {
+      console.log(`Device ${i}:`, {
+        kind: device.kind,
+        label: device.label || '(no label)',
+        deviceId: device.deviceId ? device.deviceId.substring(0, 20) + '...' : 'none'
+      });
+    });
 
     // Populate webcam select
     const videoDevices = devices.filter(d => d.kind === 'videoinput');
+    console.log('Video devices found:', videoDevices.length);
     webcamSelect.innerHTML = '';
 
     if (videoDevices.length === 0) {
@@ -206,17 +239,20 @@ async function loadDevices() {
       option.value = '';
       option.textContent = 'No cameras found';
       webcamSelect.appendChild(option);
+      console.warn('No video input devices detected');
     } else {
       videoDevices.forEach((device, index) => {
         const option = document.createElement('option');
         option.value = device.deviceId;
         option.textContent = device.label || `Camera ${index + 1}`;
         webcamSelect.appendChild(option);
+        console.log(`Added camera: ${option.textContent} (${device.deviceId.substring(0, 20)}...)`);
       });
     }
 
     // Populate microphone select
     const audioDevices = devices.filter(d => d.kind === 'audioinput');
+    console.log('Audio devices found:', audioDevices.length);
     micSelect.innerHTML = '';
 
     if (audioDevices.length === 0) {
@@ -224,16 +260,18 @@ async function loadDevices() {
       option.value = '';
       option.textContent = 'No microphones found';
       micSelect.appendChild(option);
+      console.warn('No audio input devices detected');
     } else {
       audioDevices.forEach((device, index) => {
         const option = document.createElement('option');
         option.value = device.deviceId;
         option.textContent = device.label || `Microphone ${index + 1}`;
         micSelect.appendChild(option);
+        console.log(`Added mic: ${option.textContent} (${device.deviceId.substring(0, 20)}...)`);
       });
     }
 
-    console.log(`Found ${videoDevices.length} cameras and ${audioDevices.length} microphones`);
+    console.log(`Device enumeration complete - Cameras: ${videoDevices.length}, Mics: ${audioDevices.length}`);
 
   } catch (err) {
     console.error('Error loading devices:', err);

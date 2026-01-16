@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera & Microphone Test</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #0a0a0f;
+      color: #fff;
+    }
+    h1 {
+      color: #00d4ff;
+    }
+    .status {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background: #1a1a25;
+      border: 1px solid #2a2a3a;
+    }
+    .success {
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.1);
+    }
+    .error {
+      border-color: #ff4757;
+      background: rgba(255, 71, 87, 0.1);
+    }
+    button {
+      padding: 12px 24px;
+      background: #00d4ff;
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #00b8e6;
+    }
+    pre {
+      background: #12121a;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    video {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    #log {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎥 Camera & Microphone Diagnostic Tool</h1>
+  <p>Use this page to test if your browser can access your camera and microphone.</p>
+
+  <div>
+    <button onclick="testPermissions()">1. Test Permissions</button>
+    <button onclick="listDevices()">2. List Devices</button>
+    <button onclick="testCamera()">3. Test Camera</button>
+    <button onclick="clearLog()">Clear Log</button>
+  </div>
+
+  <div id="status"></div>
+
+  <video id="testVideo" autoplay muted playsinline style="display:none;"></video>
+
+  <h3>Console Log:</h3>
+  <pre id="log"></pre>
+
+  <script>
+    const statusDiv = document.getElementById('status');
+    const logPre = document.getElementById('log');
+    const testVideo = document.getElementById('testVideo');
+
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+      logPre.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+      logPre.scrollTop = logPre.scrollHeight;
+      console.log(message);
+    }
+
+    function clearLog() {
+      logPre.textContent = '';
+      statusDiv.innerHTML = '';
+    }
+
+    async function testPermissions() {
+      log('Testing camera permission...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream.getTracks().forEach(track => track.stop());
+        log('Camera permission: GRANTED', 'success');
+        showStatus('Camera permission granted!', 'success');
+      } catch (err) {
+        log(`Camera permission: DENIED (${err.name}: ${err.message})`, 'error');
+        showStatus(`Camera permission denied: ${err.message}`, 'error');
+      }
+
+      log('Testing microphone permission...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        log('Microphone permission: GRANTED', 'success');
+        showStatus('Microphone permission granted!', 'success');
+      } catch (err) {
+        log(`Microphone permission: DENIED (${err.name}: ${err.message})`, 'error');
+        showStatus(`Microphone permission denied: ${err.message}`, 'error');
+      }
+    }
+
+    async function listDevices() {
+      log('Enumerating devices...');
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        log(`Found ${devices.length} total devices`);
+
+        const videoDevices = devices.filter(d => d.kind === 'videoinput');
+        const audioDevices = devices.filter(d => d.kind === 'audioinput');
+
+        log(`\n📹 Video Inputs (${videoDevices.length}):`);
+        if (videoDevices.length === 0) {
+          log('  No cameras found!', 'error');
+        } else {
+          videoDevices.forEach((device, i) => {
+            log(`  ${i + 1}. ${device.label || 'Unnamed Camera'}`);
+            log(`     ID: ${device.deviceId}`);
+          });
+        }
+
+        log(`\n🎤 Audio Inputs (${audioDevices.length}):`);
+        if (audioDevices.length === 0) {
+          log('  No microphones found!', 'error');
+        } else {
+          audioDevices.forEach((device, i) => {
+            log(`  ${i + 1}. ${device.label || 'Unnamed Microphone'}`);
+            log(`     ID: ${device.deviceId}`);
+          });
+        }
+
+        if (videoDevices.length > 0 && videoDevices[0].label === '') {
+          log('\n⚠️ WARNING: Device labels are empty. This means permissions were not granted.', 'error');
+          showStatus('Permissions not granted - device labels are empty', 'error');
+        } else {
+          showStatus(`Found ${videoDevices.length} camera(s) and ${audioDevices.length} mic(s)`, 'success');
+        }
+
+      } catch (err) {
+        log(`Error enumerating devices: ${err.message}`, 'error');
+        showStatus(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    async function testCamera() {
+      log('Attempting to start camera...');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false
+        });
+
+        testVideo.srcObject = stream;
+        testVideo.style.display = 'block';
+        log('Camera started successfully!', 'success');
+        showStatus('Camera is working! You should see video below.', 'success');
+
+        // Stop after 5 seconds
+        setTimeout(() => {
+          stream.getTracks().forEach(track => track.stop());
+          testVideo.srcObject = null;
+          testVideo.style.display = 'none';
+          log('Camera stopped.');
+        }, 5000);
+
+      } catch (err) {
+        log(`Failed to start camera: ${err.name} - ${err.message}`, 'error');
+        showStatus(`Camera failed: ${err.message}`, 'error');
+      }
+    }
+
+    function showStatus(message, type) {
+      const div = document.createElement('div');
+      div.className = `status ${type}`;
+      div.textContent = message;
+      statusDiv.appendChild(div);
+    }
+
+    // Auto-run basic test on load
+    window.addEventListener('load', () => {
+      log('Page loaded. Click buttons above to test your camera and microphone.');
+      log('Browser: ' + navigator.userAgent);
+      log('Protocol: ' + window.location.protocol);
+      if (window.location.protocol === 'file:') {
+        log('⚠️ WARNING: Running from file:// protocol may have permission issues', 'error');
+        showStatus('Consider running from http://localhost or https://', 'error');
+      }
+    });
+  </script>
+</body>
+</html>
