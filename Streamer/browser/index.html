@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Streamer Browser</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Custom Title Bar -->
+  <div class="titlebar">
+    <div class="titlebar-drag">
+      <div class="app-logo">
+        <div class="logo-icon"></div>
+        <span>Streamer Browser</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-container">
+    <!-- Preview Area -->
+    <div class="preview-section">
+      <div class="preview-container" id="previewContainer">
+        <video id="screenPreview" autoplay muted></video>
+        <div class="webcam-overlay" id="webcamOverlay">
+          <video id="webcamPreview" autoplay muted playsinline></video>
+          <div class="webcam-border"></div>
+        </div>
+        <div class="no-source" id="noSource">
+          <div class="no-source-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+              <rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+              <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </div>
+          <p>Select a screen or window to start</p>
+        </div>
+        <!-- Recording indicator -->
+        <div class="recording-indicator" id="recordingIndicator">
+          <div class="rec-dot"></div>
+          <span id="recordingTime">00:00:00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Sidebar -->
+    <div class="controls-sidebar">
+      <!-- Source Selection -->
+      <div class="control-panel">
+        <div class="panel-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span>Screen Source</span>
+        </div>
+        <button class="select-btn" id="selectSourceBtn">
+          <span id="sourceLabel">Choose Screen</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Webcam Settings -->
+      <div class="control-panel">
+        <div class="panel-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            <path d="M2 12c0-5.5 4.5-10 10-10s10 4.5 10 10-4.5 10-10 10-10-4.5-10-10" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span>Webcam</span>
+        </div>
+        <div class="toggle-row">
+          <span>Enable Webcam</span>
+          <label class="toggle">
+            <input type="checkbox" id="webcamToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="webcam-options" id="webcamOptions">
+          <select id="webcamSelect" class="styled-select">
+            <option value="">Select Camera</option>
+          </select>
+          <div class="position-grid">
+            <span class="position-label">Position</span>
+            <div class="position-buttons">
+              <button class="pos-btn" data-position="top-left" title="Top Left">TL</button>
+              <button class="pos-btn" data-position="top-right" title="Top Right">TR</button>
+              <button class="pos-btn active" data-position="bottom-left" title="Bottom Left">BL</button>
+              <button class="pos-btn" data-position="bottom-right" title="Bottom Right">BR</button>
+            </div>
+          </div>
+          <div class="size-slider">
+            <span>Size</span>
+            <input type="range" id="webcamSize" min="100" max="400" value="200">
+          </div>
+          <div class="shape-selector">
+            <span>Shape</span>
+            <div class="shape-buttons">
+              <button class="shape-btn active" data-shape="circle" title="Circle">
+                <svg width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg>
+              </button>
+              <button class="shape-btn" data-shape="square" title="Square">
+                <svg width="20" height="20" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="3" fill="currentColor"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="fullscreen-selector">
+            <span>Fullscreen</span>
+            <button class="fullscreen-btn" id="webcamFullscreenBtn" title="Toggle Fullscreen (F)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M16 21h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="shortcut-hint">F</span>
+            </button>
+          </div>
+          <div class="webcam-adjustments">
+            <div class="adjustment-header">
+              <span>Video Framing</span>
+              <button class="reset-btn" id="resetFramingBtn" title="Reset to default">Reset</button>
+            </div>
+            <div class="adjustment-slider">
+              <span>Zoom</span>
+              <input type="range" id="webcamZoom" min="100" max="200" value="100">
+              <span class="slider-value" id="zoomValue">1.0x</span>
+            </div>
+            <div class="adjustment-slider">
+              <span>Offset X</span>
+              <input type="range" id="webcamOffsetX" min="-50" max="50" value="0">
+              <span class="slider-value" id="offsetXValue">0</span>
+            </div>
+            <div class="adjustment-slider">
+              <span>Offset Y</span>
+              <input type="range" id="webcamOffsetY" min="-50" max="50" value="0">
+              <span class="slider-value" id="offsetYValue">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio Settings -->
+      <div class="control-panel">
+        <div class="panel-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2v20M8 6v12M4 9v6M16 6v12M20 9v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Audio</span>
+        </div>
+        <div class="toggle-row">
+          <span>System Audio</span>
+          <label class="toggle">
+            <input type="checkbox" id="systemAudioToggle" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span>Microphone</span>
+          <label class="toggle">
+            <input type="checkbox" id="micToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="audio-options" id="micOptions">
+          <select id="micSelect" class="styled-select">
+            <option value="">Select Microphone</option>
+          </select>
+          <div class="audio-meter">
+            <span>Mic Level</span>
+            <div class="meter-bar">
+              <div class="meter-fill" id="micLevel"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recording Quality -->
+      <div class="control-panel">
+        <div class="panel-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Quality</span>
+        </div>
+        <select id="qualitySelect" class="styled-select">
+          <option value="high">High (1080p 60fps)</option>
+          <option value="medium" selected>Medium (720p 30fps)</option>
+          <option value="low">Low (480p 30fps)</option>
+        </select>
+      </div>
+
+      <!-- Record Button -->
+      <div class="record-section">
+        <button class="record-btn" id="recordBtn">
+          <div class="record-icon"></div>
+          <span>Start Recording</span>
+        </button>
+        <button class="open-folder-btn" id="downloadBtn" title="Download Recording" style="display: none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"/>
+            <polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2"/>
+            <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Toast -->
+  <div class="toast" id="toast">
+    <span id="toastMessage"></span>
+  </div>
+
+  <script src="recorder.js"></script>
+</body>
+</html>

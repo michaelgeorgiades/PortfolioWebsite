@@ -1,0 +1,84 @@
+{
+  "name": "streamer",
+  "version": "1.0.0",
+  "description": "Simple screen recorder with webcam overlay for content creators",
+  "main": "main.js",
+  "author": {
+    "name": "Streamer App"
+  },
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win",
+    "build:exe": "electron-builder --win portable",
+    "build:msi": "electron-builder --win msi",
+    "build:nsis": "electron-builder --win nsis",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "body-parser": "^2.2.2",
+    "express": "^5.2.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.streamer.screenrecorder",
+    "productName": "Streamer",
+    "copyright": "Copyright 2024",
+    "asar": true,
+    "compression": "maximum",
+    "removePackageScripts": true,
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "**/*",
+      "!dist/**",
+      "!node_modules/.cache/**"
+    ],
+    "asarUnpack": [
+      "node_modules/@ffmpeg-installer/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.png",
+      "publisherName": "Streamer App"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Streamer",
+      "deleteAppDataOnUninstall": true,
+      "runAfterFinish": true
+    },
+    "msi": {
+      "oneClick": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "Streamer-Portable-${version}.${ext}"
+    }
+  }
+}
